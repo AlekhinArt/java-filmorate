@@ -25,18 +25,7 @@ public class UserController {
     @PostMapping(value = "/users")
     public User create(@RequestBody User user) {
         log.debug("Получен Post-запрос к эндпоинту create");
-        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            log.debug("email {} не прошел валидацию", user.getEmail());
-            throw new ValidationException("Введен не корректный email");
-        }
-        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            log.debug("login {} не прошел валидацию", user.getLogin());
-            throw new ValidationException("Введен не корректный логин");
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.debug("Дата рождения  {} не прошла валидацию, позже настоящего времени", user.getBirthday());
-            throw new ValidationException("Дата рождения не может быть в будущем");
-        }
+        validation(user);
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
@@ -50,21 +39,10 @@ public class UserController {
     @PutMapping(value = "/users")
     public User put(@RequestBody User user) {
         log.debug("Получен put-запрос к эндпоинту put");
+        validation(user);
         if (!users.containsKey(user.getId())) {
             log.debug("Пользователя с id {} нет", user.getId());
             throw new ValidationException("Нет пользователя с таким id");
-        }
-        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            log.debug("email {} не прошел валидацию", user.getEmail());
-            throw new ValidationException("Введен не корректный email");
-        }
-        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            log.debug("login {} не прошел валидацию", user.getLogin());
-            throw new ValidationException("Введен не корректный логин");
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.debug("Дата рождения  {} не прошла валидацию, позже настоящего времени", user.getBirthday());
-            throw new ValidationException("Дата рождения не может быть в будущем");
         }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
@@ -72,6 +50,22 @@ public class UserController {
         users.put(user.getId(), user);
         log.info("Обновлены данные пользователя {}, с id {}", user, user.getId());
         return user;
+    }
+
+    protected static void validation(User user) {
+        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+            log.debug("email {} не прошел валидацию", user.getEmail());
+            throw new ValidationException("Введен не корректный email");
+        }
+        if (user.getLogin() == null || user.getLogin().isBlank()) {
+            log.debug("login {} не прошел валидацию", user.getLogin());
+            throw new ValidationException("Введен не корректный логин");
+        }
+        if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
+            log.debug("Дата рождения  {} не прошла валидацию, позже настоящего времени или null", user.getBirthday());
+            throw new ValidationException("Дата рождения не может быть в будущем или null");
+        }
+
     }
 
 

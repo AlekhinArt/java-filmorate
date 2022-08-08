@@ -16,7 +16,7 @@ import java.util.Map;
 public class FilmController {
     private final Map<Integer, Film> films = new HashMap<>();
     private static final int MAX_LENGTH_DESCRIPTION = 200;
-    LocalDate MIN_RELEASE_DATE_FILM = LocalDate.of(1895, 12, 28);
+    private static final LocalDate MIN_RELEASE_DATE_FILM = LocalDate.of(1895, 12, 28);
     private int id = 1;
 
     @GetMapping("/films")
@@ -28,22 +28,7 @@ public class FilmController {
     @PostMapping(value = "/films")
     public Film create(@RequestBody Film film) {
         log.debug("Получен Post-запрос к эндпоинту create");
-        if (film.getName() == null || film.getName().isBlank()) {
-            log.debug("Имя {} не прошло валидацию, пустое или null", film.getName());
-            throw new ValidationException("Название фильма не может быть пустым");
-        }
-        if (film.getDescription().length() > MAX_LENGTH_DESCRIPTION) {
-            log.debug("Описание {} не прошло валидацию, по количеству символов", film.getDescription());
-            throw new ValidationException("Описание фильма больше " + MAX_LENGTH_DESCRIPTION + " символов");
-        }
-        if (film.getReleaseDate().isBefore(MIN_RELEASE_DATE_FILM)) {
-            log.debug("Дата {} не прошла валидацию, слишком ранняя дата выхода фильма", film.getReleaseDate());
-            throw new ValidationException("Фильм не может выйти раньше чем " + MIN_RELEASE_DATE_FILM);
-        }
-        if (film.getDuration() < 0) {
-            log.debug("Длительность фильма не может быть <0, введено {}", film.getDuration());
-            throw new ValidationException("Длительность фильма не может быть отрицательной");
-        }
+        validation(film);
         film.setId(id);
         films.put(film.getId(), film);
         log.info("Добавлен фильм {}, id хранения {}", film, film.getId());
@@ -58,25 +43,30 @@ public class FilmController {
             log.debug("Фильма с id {} нет", film.getId());
             throw new ValidationException("Фильма с таким id нет");
         }
+        validation(film);
+        films.put(film.getId(), film);
+        log.info("Обновлен фильм {}, id хранения {}", film, film.getId());
+        return film;
+    }
+
+    protected static void validation(Film film) {
         if (film.getName() == null || film.getName().isBlank()) {
             log.debug("Имя {} не прошло валидацию, пустое или null", film.getName());
             throw new ValidationException("Название фильма не может быть пустым");
         }
-        if (film.getDescription().length() > MAX_LENGTH_DESCRIPTION) {
+        if (film.getDescription() == null || film.getDescription().length() > MAX_LENGTH_DESCRIPTION) {
             log.debug("Описание {} не прошло валидацию, по количеству символов", film.getDescription());
             throw new ValidationException("Описание фильма больше " + MAX_LENGTH_DESCRIPTION + " символов");
         }
-        if (film.getReleaseDate().isBefore(MIN_RELEASE_DATE_FILM)) {
+        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(MIN_RELEASE_DATE_FILM)) {
             log.debug("Дата {} не прошла валидацию, слишком ранняя дата выхода фильма", film.getReleaseDate());
             throw new ValidationException("Фильм не может выйти раньше чем " + MIN_RELEASE_DATE_FILM);
         }
         if (film.getDuration() < 0) {
-            log.debug("Длительность фильма не может быть <0, введено {}", film.getDuration());
+            log.debug("Длительность фильма не может быть < 0, введено {}", film.getDuration());
             throw new ValidationException("Длительность фильма не может быть отрицательной");
         }
-        films.put(film.getId(), film);
-        log.info("Обновлен фильм {}, id хранения {}", film, film.getId());
-        return film;
+
     }
 
 }
