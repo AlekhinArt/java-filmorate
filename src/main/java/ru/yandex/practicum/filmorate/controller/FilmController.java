@@ -3,70 +3,68 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
 
-import java.time.LocalDate;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+
+import static ru.yandex.practicum.filmorate.Constants.FILM_COUNTS_BY_DEFAULT;
 
 @Slf4j
 @RestController
 public class FilmController {
-    private final Map<Integer, Film> films = new HashMap<>();
-    private static final int MAX_LENGTH_DESCRIPTION = 200;
-    private static final LocalDate MIN_RELEASE_DATE_FILM = LocalDate.of(1895, 12, 28);
-    private int id = 1;
+    private final FilmService filmService;
+    private final InMemoryFilmStorage filmStorage;
+
+    public FilmController(FilmService filmService, InMemoryFilmStorage filmStorage) {
+        this.filmService = filmService;
+        this.filmStorage = filmStorage;
+    }
 
     @GetMapping("/films")
     public Collection<Film> getAllFilms() {
         log.debug("Получен Get-запрос к эндпоинту getAllFilms");
-        return films.values();
+        return filmStorage.getAllFilms();
+    }
+
+    @GetMapping("/films/{id}")
+    public Film getUser(@PathVariable int id) {
+        log.debug("Получен Get-запрос к эндпоинту getAllUsers");
+        return filmStorage.getFilm(id);
     }
 
     @PostMapping(value = "/films")
     public Film create(@RequestBody Film film) {
         log.debug("Получен Post-запрос к эндпоинту create");
-        validation(film);
-        film.setId(id);
-        films.put(film.getId(), film);
-        log.info("Добавлен фильм {}, id хранения {}", film, film.getId());
-        id++;
-        return film;
+        return filmStorage.createNewFilm(film);
     }
 
     @PutMapping(value = "/films")
     public Film put(@RequestBody Film film) {
         log.debug("Получен Put-запрос к эндпоинту put");
-        if (!films.containsKey(film.getId())) {
-            log.debug("Фильма с id {} нет", film.getId());
-            throw new ValidationException("Фильма с таким id нет");
-        }
-        validation(film);
-        films.put(film.getId(), film);
-        log.info("Обновлен фильм {}, id хранения {}", film, film.getId());
-        return film;
+        return filmStorage.updateFilm(film);
     }
 
-    protected static void validation(Film film) {
-        if (film.getName() == null || film.getName().isBlank()) {
-            log.debug("Имя {} не прошло валидацию, пустое или null", film.getName());
-            throw new ValidationException("Название фильма не может быть пустым");
-        }
-        if (film.getDescription() == null || film.getDescription().length() > MAX_LENGTH_DESCRIPTION) {
-            log.debug("Описание {} не прошло валидацию, по количеству символов", film.getDescription());
-            throw new ValidationException("Описание фильма больше " + MAX_LENGTH_DESCRIPTION + " символов");
-        }
-        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(MIN_RELEASE_DATE_FILM)) {
-            log.debug("Дата {} не прошла валидацию, слишком ранняя дата выхода фильма", film.getReleaseDate());
-            throw new ValidationException("Фильм не может выйти раньше чем " + MIN_RELEASE_DATE_FILM);
-        }
-        if (film.getDuration() < 0) {
-            log.debug("Длительность фильма не может быть < 0, введено {}", film.getDuration());
-            throw new ValidationException("Длительность фильма не может быть отрицательной");
-        }
+    @PutMapping("/films/{id}/like/{userId}")
+    public void addLike(@PathVariable int id, @PathVariable int userId) {
+        log.debug("Получен Put-запрос к эндпоинту addLike id : {}, userId : {}", id, userId);
+        filmService.addLike(id, userId);
+    }
 
+    @DeleteMapping("/films/{id}/like/{userId}")
+    public void deleteLike(@PathVariable int id, @PathVariable int userId) {
+        log.debug("Получен delete-запрос к эндпоинту deleteLike id : {}, userId : {}", id, userId);
+        filmService.deleteLike(id, userId);
+    }
+
+    @GetMapping("/films/popular")
+    public Collection<Film> getPopularFilms(@RequestParam(required = false) String count) {
+        log.debug("Получен Get-запрос к эндпоинту getPopularFilms count {}", count);
+        if (count != null) {
+            return filmService.getMostPopularFilms(Integer.parseInt(count));
+        } else return filmService.getMostPopularFilms(FILM_COUNTS_BY_DEFAULT);
     }
 
 }
