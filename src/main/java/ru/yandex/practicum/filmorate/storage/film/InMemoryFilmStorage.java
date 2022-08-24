@@ -30,7 +30,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
         return films.get(id);
     }
-
+    @Override
     public Film createNewFilm(Film film) {
         validation(film);
         film.setId(id);
@@ -38,11 +38,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         id++;
         return film;
     }
-
+    @Override
     public Collection<Film> getAllFilms() {
         return films.values();
     }
-
+    @Override
     public Film updateFilm(Film film) {
         if (!films.containsKey(film.getId())) {
             throw new FilmNotFoundException("Фильма с таким id нет");
