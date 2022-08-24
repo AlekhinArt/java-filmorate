@@ -1,52 +1,37 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.film;
 
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
 
-
 @Service
-public class FilmService  extends InMemoryFilmStorage{
+@AllArgsConstructor
+public class FilmService extends InMemoryFilmStorage {
 
-    FilmStorage filmStorage;
     UserStorage userStorage;
 
-    @Autowired
-    public FilmService(FilmStorage inMemoryFilmStorage, UserStorage inMemoryUserStorage) {
-        this.filmStorage = inMemoryFilmStorage;
-        this.userStorage = inMemoryUserStorage;
-    }
-
     public void addLike(Integer idFilm, Integer idUser) {
-        checkFilm(idFilm).addLike(checkUser(idUser));
+        checkFilm(idFilm).addLike(checkUser(idUser).getId());
     }
 
     public void deleteLike(Integer idFilm, Integer idUser) {
-        checkFilm(idFilm).deleteLike(checkUser(idUser));
+        checkFilm(idFilm).deleteLike(checkUser(idUser).getId());
     }
 
     public Collection<Film> getMostPopularFilms(int count) {
-        Map<Integer, Film> films = filmStorage.getFilms();
+        Map<Integer, Film> films = super.getFilms();
         List<Film> mostPopularFilms = new LinkedList<>(films.values());
         List<Film> countPopularFilms = new LinkedList<>();
         if (mostPopularFilms.size() <= 1) return mostPopularFilms;
         if (mostPopularFilms.size() < count) count = mostPopularFilms.size();
-        mostPopularFilms.sort(new Comparator<Film>() {
-            @Override
-            public int compare(Film o1, Film o2) {
-                return o2.getLikes().size() - o1.getLikes().size();
-            }
-        });
+        mostPopularFilms.sort((o1, o2) -> o2.getLikes().size() - o1.getLikes().size());
         for (int i = 0; i < count; i++) {
             countPopularFilms.add(mostPopularFilms.get(i));
         }
@@ -54,7 +39,7 @@ public class FilmService  extends InMemoryFilmStorage{
     }
 
     protected Film checkFilm(Integer idFilm) {
-        Map<Integer, Film> films = filmStorage.getFilms();
+        Map<Integer, Film> films = super.getFilms();
         if (!films.containsKey(idFilm)) {
             throw new FilmNotFoundException("Фильма с таким id не существует");
         }

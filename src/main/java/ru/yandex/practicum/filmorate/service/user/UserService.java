@@ -1,6 +1,5 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -9,17 +8,10 @@ import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import java.util.*;
 
 @Service
-public class UserService {
-
-    final InMemoryUserStorage userStorage;
-
-    @Autowired
-    public UserService(InMemoryUserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
+public class UserService extends InMemoryUserStorage {
 
     public void addFriend(int id, int friendId) {
-        Map<Integer, User> users = userStorage.getUsers();
+        Map<Integer, User> users = super.getUsers();
         if (!users.containsKey(id) || !users.containsKey(friendId)) {
             throw new UserNotFoundException("Пользователя с таким id не существует");
         }
@@ -28,7 +20,7 @@ public class UserService {
     }
 
     public void deleteFriend(int id, int friendId) {
-        Map<Integer, User> users = userStorage.getUsers();
+        Map<Integer, User> users = super.getUsers();
         if (!users.containsKey(id) || !users.containsKey(friendId)) {
             throw new UserNotFoundException("Пользователя с таким id не существует");
         }
@@ -37,7 +29,7 @@ public class UserService {
     }
 
     public Collection<User> getCommonFriend(int id, int friendId) {
-        Map<Integer, User> users = userStorage.getUsers();
+        Map<Integer, User> users = super.getUsers();
         if (!users.containsKey(id) || !users.containsKey(friendId)) {
             throw new UserNotFoundException("Пользователя с таким id не существует");
         }
@@ -57,7 +49,7 @@ public class UserService {
     }
 
     public Collection<User> getFriends(int id) {
-        Map<Integer, User> users = userStorage.getUsers();
+        Map<Integer, User> users = super.getUsers();
         if (!users.containsKey(id)) {
             throw new UserNotFoundException("Пользователя с таким id не существует");
         }

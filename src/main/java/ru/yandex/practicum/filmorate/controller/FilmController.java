@@ -5,8 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import java.util.Collection;
 
@@ -16,35 +15,33 @@ import static ru.yandex.practicum.filmorate.Constants.FILM_COUNTS_BY_DEFAULT;
 @RestController
 public class FilmController {
     private final FilmService filmService;
-    private final InMemoryFilmStorage filmStorage;
 
-    public FilmController(FilmService filmService, InMemoryFilmStorage filmStorage) {
+    public FilmController(FilmService filmService) {
         this.filmService = filmService;
-        this.filmStorage = filmStorage;
     }
 
     @GetMapping("/films")
     public Collection<Film> getAllFilms() {
         log.debug("Получен Get-запрос к эндпоинту getAllFilms");
-        return filmStorage.getAllFilms();
+        return filmService.getAllFilms();
     }
 
     @GetMapping("/films/{id}")
     public Film getUser(@PathVariable int id) {
         log.debug("Получен Get-запрос к эндпоинту getAllUsers");
-        return filmStorage.getFilm(id);
+        return filmService.getFilm(id);
     }
 
     @PostMapping(value = "/films")
     public Film create(@RequestBody Film film) {
         log.debug("Получен Post-запрос к эндпоинту create");
-        return filmStorage.createNewFilm(film);
+        return filmService.createNewFilm(film);
     }
 
     @PutMapping(value = "/films")
     public Film put(@RequestBody Film film) {
         log.debug("Получен Put-запрос к эндпоинту put");
-        return filmStorage.updateFilm(film);
+        return filmService.updateFilm(film);
     }
 
     @PutMapping("/films/{id}/like/{userId}")

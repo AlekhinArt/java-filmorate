@@ -1,27 +1,22 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.net.UnknownServiceException;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-@Component
 public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Integer, User> users = new HashMap<>();
     private int id = 1;
 
-
+    @Override
     public User getUser(int id) {
         if (!users.containsKey(id)) {
             throw new UserNotFoundException("Нет пользователя с таким id");
@@ -29,11 +24,12 @@ public class InMemoryUserStorage implements UserStorage {
         return users.get(id);
     }
 
+    @Override
     public Collection<User> getAllUsers() {
         return users.values();
     }
 
-
+    @Override
     public User createNewUser(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
@@ -45,7 +41,7 @@ public class InMemoryUserStorage implements UserStorage {
         return user;
     }
 
-
+    @Override
     public User updateUser(User user) {
         if (!users.containsKey(user.getId())) {
             throw new UserNotFoundException("Нет пользователя с таким id");
@@ -58,6 +54,12 @@ public class InMemoryUserStorage implements UserStorage {
         users.put(user.getId(), user);
         return user;
     }
+
+    @Override
+    public Map<Integer, User> getUsers() {
+        return users;
+    }
+
 
     protected static void validation(User user) {
         if (user.getId() < 0) {
@@ -76,8 +78,6 @@ public class InMemoryUserStorage implements UserStorage {
             throw new ValidationException("Дата рождения не может быть в будущем или null");
         }
     }
-
-    public Map<Integer, User> getUsers() {
-        return users;
-    }
 }
+
+
