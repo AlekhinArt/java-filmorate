@@ -1,5 +1,5 @@
 # java-filmorate
 Template repository for Filmorate project.
 
-<iframe width="560" height="315" src='https://dbdiagram.io/embed/6318cd010911f91ba558f6c8'> </iframe>
 
+![diagrama](https://user-images.githubusercontent.com/102388301/188953058-ca464a65-cc19-4845-a1a9-ef81505104cc.png)
