@@ -1,11 +1,11 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,7 +15,7 @@ import static ru.yandex.practicum.filmorate.Constants.MAX_LENGTH_DESCRIPTION;
 import static ru.yandex.practicum.filmorate.Constants.MIN_RELEASE_DATE_FILM;
 
 @Slf4j
-@Component
+
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Integer, Film> films = new HashMap<>();
@@ -57,6 +57,47 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Map<Integer, Film> getFilms() {
         return films;
+    }
+
+    @Override
+    public void addLike(Integer idFilm, Integer idUser) {
+
+    }
+
+    @Override
+    public void deleteLike(Integer idFilm, Integer idUser) {
+
+    }
+
+    @Override
+    public Collection<Film> getMostPopularFilms(int count) {
+
+        return null;
+    }
+
+    @Override
+    public MpaRating getMpaRating(int id) {
+        return null;
+    }
+
+    @Override
+    public Collection<MpaRating> getMpaRatings() {
+        return null;
+    }
+
+    @Override
+    public Genre getGenre(int id) {
+        return null;
+    }
+
+    @Override
+    public Collection<Genre> getGenres() {
+        return null;
+    }
+
+    @Override
+    public void deleteAll() {
+
     }
 
     protected static void validation(Film film) {

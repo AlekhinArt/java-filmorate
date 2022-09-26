@@ -17,14 +17,12 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
-
     public void addFriend(int id, int friendId) {
         Map<Integer, User> users = userStorage.getUsers();
         if (!users.containsKey(id) || !users.containsKey(friendId)) {
             throw new UserNotFoundException("Пользователя с таким id не существует");
         }
-        users.get(id).addFriends(friendId);
-        users.get(friendId).addFriends(id);
+        userStorage.addFriend(id, friendId);
     }
 
     public void deleteFriend(int id, int friendId) {
@@ -32,8 +30,7 @@ public class UserService {
         if (!users.containsKey(id) || !users.containsKey(friendId)) {
             throw new UserNotFoundException("Пользователя с таким id не существует");
         }
-        users.get(id).deleteFriend(friendId);
-        users.get(friendId).deleteFriend(id);
+        userStorage.deleteFriend(id,friendId);
     }
 
     public Collection<User> getCommonFriend(int id, int friendId) {
@@ -84,4 +81,5 @@ public class UserService {
     public User updateUser(User user) {
         return userStorage.updateUser(user);
     }
+
 }

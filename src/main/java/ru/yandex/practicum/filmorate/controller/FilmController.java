@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import java.util.Collection;
@@ -64,5 +66,30 @@ public class FilmController {
             return filmService.getMostPopularFilms(Integer.parseInt(count));
         } else return filmService.getMostPopularFilms(FILM_COUNTS_BY_DEFAULT);
     }
+
+    @GetMapping("/mpa/{id}")
+    public MpaRating getMpaRating(@PathVariable int id) {
+        log.debug("Получен Get-запрос к эндпоинту getAllUsers");
+        return filmService.getMpaRating(id);
+    }
+
+    @GetMapping("/mpa")
+    public Collection<MpaRating> getMpaRatings() {
+        log.debug("Получен Get-запрос к эндпоинту getAllUsers");
+        return filmService.getMpaRatings();
+    }
+
+    @GetMapping("/genres/{id}")
+    public Genre getGenre(@PathVariable int id) {
+        log.debug("Получен Get-запрос к эндпоинту getAllUsers");
+        return filmService.getGenre(id);
+    }
+
+    @GetMapping("/genres")
+    public Collection<Genre> getGenres() {
+        log.debug("Получен Get-запрос к эндпоинту getAllUsers");
+        return filmService.getGenres();
+    }
+
 
 }

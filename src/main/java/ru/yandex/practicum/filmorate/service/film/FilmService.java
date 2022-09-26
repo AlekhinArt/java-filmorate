@@ -4,8 +4,11 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.UnCorrectIDException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -22,28 +25,23 @@ public class FilmService {
     @Autowired
     public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
         this.filmStorage = filmStorage;
-        this.userStorage=userStorage;
+        this.userStorage = userStorage;
     }
 
     public void addLike(Integer idFilm, Integer idUser) {
-        checkFilm(idFilm).addLike(checkUser(idUser).getId());
+        checkUser(idFilm);
+        checkUser(idUser);
+        filmStorage.addLike(idFilm, idUser);
     }
 
     public void deleteLike(Integer idFilm, Integer idUser) {
-        checkFilm(idFilm).deleteLike(checkUser(idUser).getId());
+        checkFilm(idFilm);
+        checkUser(idUser);
+        filmStorage.deleteLike(idFilm, idUser);
     }
 
     public Collection<Film> getMostPopularFilms(int count) {
-        Map<Integer, Film> films = filmStorage.getFilms();
-        List<Film> mostPopularFilms = new LinkedList<>(films.values());
-        List<Film> countPopularFilms = new LinkedList<>();
-        if (mostPopularFilms.size() <= 1) return mostPopularFilms;
-        if (mostPopularFilms.size() < count) count = mostPopularFilms.size();
-        mostPopularFilms.sort((o1, o2) -> o2.getLikes().size() - o1.getLikes().size());
-        for (int i = 0; i < count; i++) {
-            countPopularFilms.add(mostPopularFilms.get(i));
-        }
-        return countPopularFilms;
+        return filmStorage.getMostPopularFilms(count);
     }
 
     protected Film checkFilm(Integer idFilm) {
@@ -77,5 +75,27 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         return filmStorage.updateFilm(film);
+    }
+
+    public MpaRating getMpaRating(int id) {
+        if (id < 0) {
+            throw new UnCorrectIDException("Не корректно введен id: " + id);
+        }
+        return filmStorage.getMpaRating(id);
+    }
+
+    public Collection<MpaRating> getMpaRatings() {
+        return filmStorage.getMpaRatings();
+    }
+
+    public Genre getGenre(int id) {
+        if (id < 0) {
+            throw new UnCorrectIDException("Не корректно введен id: " + id);
+        }
+        return filmStorage.getGenre(id);
+    }
+
+    public Collection<Genre> getGenres() {
+        return filmStorage.getGenres();
     }
 }
