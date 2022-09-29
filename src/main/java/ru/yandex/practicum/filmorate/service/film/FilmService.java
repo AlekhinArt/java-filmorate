@@ -1,101 +1,40 @@
 package ru.yandex.practicum.filmorate.service.film;
 
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UnCorrectIDException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.*;
+import java.util.Collection;
 
-@Service
-@AllArgsConstructor
-public class FilmService {
+public interface FilmService {
+    void addLike(Integer idFilm, Integer idUser);
 
-    private UserStorage userStorage;
-    private FilmStorage filmStorage;
+    void deleteLike(Integer idFilm, Integer idUser);
 
-    @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-    }
+    void deleteAllFilms();
 
-    public void addLike(Integer idFilm, Integer idUser) {
-        checkUser(idFilm);
-        checkUser(idUser);
-        filmStorage.addLike(idFilm, idUser);
-    }
+    void deleteFilm(int id);
 
-    public void deleteLike(Integer idFilm, Integer idUser) {
-        checkFilm(idFilm);
-        checkUser(idUser);
-        filmStorage.deleteLike(idFilm, idUser);
-    }
+    Collection<Film> getMostPopularFilms(int count);
 
-    public Collection<Film> getMostPopularFilms(int count) {
-        return filmStorage.getMostPopularFilms(count);
-    }
+    Film checkFilm(Integer idFilm);
 
-    protected Film checkFilm(Integer idFilm) {
-        Map<Integer, Film> films = filmStorage.getFilms();
-        if (!films.containsKey(idFilm)) {
-            throw new FilmNotFoundException("Фильма с таким id не существует");
-        }
-        return films.get(idFilm);
-    }
+    User checkUser(Integer idUser);
 
-    protected User checkUser(Integer idUser) {
-        Map<Integer, User> users = userStorage.getUsers();
-        if (!users.containsKey(idUser)) {
-            throw new UserNotFoundException("Пользователя с таким id не существует");
-        }
-        return users.get(idUser);
+    Collection<Film> getAllFilms();
 
-    }
+    Film getFilm(int id);
 
-    public Collection<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
-    }
+    Film createNewFilm(Film film);
 
-    public Film getFilm(int id) {
-        return filmStorage.getFilm(id);
-    }
+    Film updateFilm(Film film);
 
-    public Film createNewFilm(Film film) {
-        return filmStorage.createNewFilm(film);
-    }
+    MpaRating getMpaRating(int id);
 
-    public Film updateFilm(Film film) {
-        return filmStorage.updateFilm(film);
-    }
+    Collection<MpaRating> getMpaRatings();
 
-    public MpaRating getMpaRating(int id) {
-        if (id < 0) {
-            throw new UnCorrectIDException("Не корректно введен id: " + id);
-        }
-        return filmStorage.getMpaRating(id);
-    }
+    Genre getGenre(int id);
 
-    public Collection<MpaRating> getMpaRatings() {
-        return filmStorage.getMpaRatings();
-    }
-
-    public Genre getGenre(int id) {
-        if (id < 0) {
-            throw new UnCorrectIDException("Не корректно введен id: " + id);
-        }
-        return filmStorage.getGenre(id);
-    }
-
-    public Collection<Genre> getGenres() {
-        return filmStorage.getGenres();
-    }
+    Collection<Genre> getGenres();
 }

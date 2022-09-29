@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -15,7 +16,7 @@ import static ru.yandex.practicum.filmorate.Constants.MAX_LENGTH_DESCRIPTION;
 import static ru.yandex.practicum.filmorate.Constants.MIN_RELEASE_DATE_FILM;
 
 @Slf4j
-
+@Component
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Integer, Film> films = new HashMap<>();
@@ -97,6 +98,11 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public void deleteAll() {
+
+    }
+
+    @Override
+    public void deleteFilm(int id) {
 
     }
 

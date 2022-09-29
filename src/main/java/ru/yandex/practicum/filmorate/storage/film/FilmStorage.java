@@ -39,4 +39,6 @@ public interface FilmStorage {
     Collection<Genre> getGenres();
 
     void deleteAll();
+
+    void deleteFilm(int id);
 }

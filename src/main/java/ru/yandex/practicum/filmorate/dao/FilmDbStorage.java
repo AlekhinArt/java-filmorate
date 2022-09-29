@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dao;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -9,6 +10,7 @@ import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MpaRating;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.sql.*;
@@ -19,13 +21,10 @@ import static ru.yandex.practicum.filmorate.Constants.MAX_LENGTH_DESCRIPTION;
 import static ru.yandex.practicum.filmorate.Constants.MIN_RELEASE_DATE_FILM;
 
 @Slf4j
-@Component
+@AllArgsConstructor
+@Component("filmDbStorage")
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
-
-    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public Film getFilm(int id) {
@@ -69,6 +68,7 @@ public class FilmDbStorage implements FilmStorage {
         }
         return film;
     }
+
 
     @Override
     public List<Film> getAllFilms() {
@@ -114,6 +114,7 @@ public class FilmDbStorage implements FilmStorage {
             setGenre(film);
             allFilmWithID.put(film.getId(), film);
         }
+
         return allFilmWithID;
     }
 
@@ -153,7 +154,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<MpaRating> getMpaRatings() {
-        return jdbcTemplate.query("SELECT * FROM mpa", FilmDbStorage::makeMpa);
+        return jdbcTemplate.query("SELECT * FROM mpa GROUP BY mpa_id ORDER BY mpa_id ", FilmDbStorage::makeMpa);
     }
 
     @Override
@@ -168,12 +169,18 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Genre> getGenres() {
-        return jdbcTemplate.query("SELECT * FROM genre", FilmDbStorage::makeGenre);
+        return jdbcTemplate.query("SELECT * FROM genre GROUP BY genre_id ORDER BY genre_id", FilmDbStorage::makeGenre);
     }
 
     @Override
     public void deleteAll() {
         jdbcTemplate.update("DELETE FROM films");
+    }
+
+    @Override
+    public void deleteFilm(int id) {
+        jdbcTemplate.update("DELETE FROM films WHERE film_id = ?", id);
+
     }
 
     private static Film makeFilm(ResultSet rs, int rowNum) throws SQLException {

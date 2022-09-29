@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dao;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -20,15 +21,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @Slf4j
-@Component
+@AllArgsConstructor
+@Component("userStorage")
 public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
-
-    public UserDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
 
     @Override
     public void addFriend(int id, int friendId) {
@@ -117,6 +114,11 @@ public class UserDbStorage implements UserStorage {
     @Override
     public void deleteAll() {
         jdbcTemplate.update("DELETE FROM users");
+    }
+
+    @Override
+    public void deleteUser(int id) {
+        jdbcTemplate.update("DELETE FROM users where id =?", id);
     }
 
     private static Set<Integer> extractData(ResultSet rs) throws SQLException {
