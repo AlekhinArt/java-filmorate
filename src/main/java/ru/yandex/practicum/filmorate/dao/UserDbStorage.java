@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.UnCorrectIDException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
@@ -44,30 +43,25 @@ public class UserDbStorage implements UserStorage {
         if (id < 1) {
             throw new UnCorrectIDException("Не корректный id: " + id);
         }
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM users WHERE user_id =?", id);
-        if (userRows.next()) {
-            User user = new User(
-                    userRows.getInt("user_id"),
-                    userRows.getString("login"),
-                    userRows.getString("email"),
-                    userRows.getString("name"),
-                    userRows.getDate("birthday").toLocalDate()
-            );
-            String sql = ("SELECT friend_id FROM friends WHERE user_id =" + id);
-            user.setFriends(jdbcTemplate.query(sql, UserDbStorage::extractData));
-            return user;
-        } else {
+        String sql = "SELECT u.*, listagg(f.friend_id) as friend_id " +
+                "FROM users as u " +
+                "LEFT JOIN FRIENDS F on u.user_id = F.user_id " +
+                "WHERE u.user_id = ? " +
+                "GROUP BY u.user_id ";
+        List<User> users = jdbcTemplate.query(sql, UserDbStorage::makeUser, id);
+        if (users.size() < 1) {
             throw new UserNotFoundException("Пользователя с " + id + " не существует");
         }
+        return users.get(0);
     }
 
     @Override
     public List<User> getAllUsers() {
-        List<User> users = jdbcTemplate.query("select * from users", (rs, rowNum) -> makeUser(rs));
-        for (User user : users) {
-            String sql = ("SELECT friend_id FROM friends WHERE user_id =" + user.getId());
-            user.setFriends(jdbcTemplate.query(sql, UserDbStorage::extractData));
-        }
+        String sql = "SELECT u.*, listagg(f.friend_id) as friend_id " +
+                "FROM users as u " +
+                "LEFT JOIN FRIENDS F on u.user_id = F.user_id " +
+                "GROUP BY u.user_id ";
+        List<User> users = jdbcTemplate.query(sql, UserDbStorage::makeUser);
         return users;
     }
 
@@ -101,11 +95,13 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Map<Integer, User> getUsers() {
-        List<User> users = jdbcTemplate.query("select * from users", (rs, rowNum) -> makeUser(rs));
         Map<Integer, User> allUsers = new HashMap<>();
+        String sql = "SELECT u.*, listagg(f.friend_id) as friend_id " +
+                "FROM users as u " +
+                "LEFT JOIN FRIENDS F on u.user_id = F.user_id " +
+                "GROUP BY u.user_id ";
+        List<User> users = jdbcTemplate.query(sql, UserDbStorage::makeUser);
         for (User user : users) {
-            String sql = ("SELECT friend_id FROM friends WHERE user_id =" + user.getId());
-            user.setFriends(jdbcTemplate.query(sql, UserDbStorage::extractData));
             allUsers.put(user.getId(), user);
         }
         return allUsers;
@@ -121,20 +117,27 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.update("DELETE FROM users where id =?", id);
     }
 
-    private static Set<Integer> extractData(ResultSet rs) throws SQLException {
-        Set<Integer> userFriends = new HashSet<>();
-        while (rs.next()) {
-            userFriends.add(rs.getInt("friend_id"));
-        }
-        return userFriends;
+    private static User makeUser(ResultSet rs, int rowNum) throws SQLException {
+        return User.builder()
+                .id(rs.getInt("user_id"))
+                .login(rs.getString("login"))
+                .email(rs.getString("email"))
+                .name(rs.getString("name"))
+                .birthday(rs.getDate("birthday").toLocalDate())
+                .friends(makeFriendsList(rs))
+                .build();
     }
 
-    private User makeUser(ResultSet rs) throws SQLException {
-        return new User(rs.getInt("user_id"),
-                rs.getString("login"),
-                rs.getString("email"),
-                rs.getString("name"),
-                rs.getDate("birthday").toLocalDate());
+    private static Set<Integer> makeFriendsList(ResultSet rs) throws SQLException {
+        Set<Integer> friends = new HashSet<>();
+        if (rs.getString("friend_id") == null) {
+            return new HashSet<>();
+        }
+        String[] friendsLines = rs.getString("friend_id").split(",");
+        for (String friendsLine : friendsLines) {
+            friends.add(Integer.parseInt(friendsLine));
+        }
+        return friends;
     }
 
     protected static void validation(User user) {
