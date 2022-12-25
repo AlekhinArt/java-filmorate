@@ -19,6 +19,16 @@ public class InMemoryUserStorage implements UserStorage {
     private int id = 1;
 
     @Override
+    public void addFriend(int id, int friendId) {
+
+    }
+
+    @Override
+    public void deleteFriend(int id, int friendId) {
+
+    }
+
+    @Override
     public User getUser(int id) {
         if (!users.containsKey(id)) {
             throw new UserNotFoundException("Нет пользователя с таким id");
@@ -49,7 +59,6 @@ public class InMemoryUserStorage implements UserStorage {
             throw new UserNotFoundException("Нет пользователя с таким id");
         }
         validation(user);
-
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
@@ -60,6 +69,16 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public Map<Integer, User> getUsers() {
         return users;
+    }
+
+    @Override
+    public void deleteAll() {
+
+    }
+
+    @Override
+    public void deleteUser(int id) {
+
     }
 
 

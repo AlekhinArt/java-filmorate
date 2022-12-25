@@ -9,6 +9,10 @@ import java.util.Map;
 @Component
 public interface UserStorage {
 
+    void addFriend(int id, int friendId);
+
+    void deleteFriend(int id, int friendId);
+
     User getUser(int id);
 
     Collection<User> getAllUsers();
@@ -18,4 +22,8 @@ public interface UserStorage {
     User updateUser(User user);
 
     Map<Integer, User> getUsers();
+
+    void deleteAll();
+
+    void deleteUser(int id);
 }

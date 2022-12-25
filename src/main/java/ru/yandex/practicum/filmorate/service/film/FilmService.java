@@ -1,81 +1,40 @@
 package ru.yandex.practicum.filmorate.service.film;
 
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.*;
+import java.util.Collection;
 
-@Service
-@AllArgsConstructor
-public class FilmService {
+public interface FilmService {
+    void addLike(Integer idFilm, Integer idUser);
 
-    private UserStorage userStorage;
-    private FilmStorage filmStorage;
+    void deleteLike(Integer idFilm, Integer idUser);
 
-    @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage=userStorage;
-    }
+    void deleteAllFilms();
 
-    public void addLike(Integer idFilm, Integer idUser) {
-        checkFilm(idFilm).addLike(checkUser(idUser).getId());
-    }
+    void deleteFilm(int id);
 
-    public void deleteLike(Integer idFilm, Integer idUser) {
-        checkFilm(idFilm).deleteLike(checkUser(idUser).getId());
-    }
+    Collection<Film> getMostPopularFilms(int count);
 
-    public Collection<Film> getMostPopularFilms(int count) {
-        Map<Integer, Film> films = filmStorage.getFilms();
-        List<Film> mostPopularFilms = new LinkedList<>(films.values());
-        List<Film> countPopularFilms = new LinkedList<>();
-        if (mostPopularFilms.size() <= 1) return mostPopularFilms;
-        if (mostPopularFilms.size() < count) count = mostPopularFilms.size();
-        mostPopularFilms.sort((o1, o2) -> o2.getLikes().size() - o1.getLikes().size());
-        for (int i = 0; i < count; i++) {
-            countPopularFilms.add(mostPopularFilms.get(i));
-        }
-        return countPopularFilms;
-    }
+    Film checkFilm(Integer idFilm);
 
-    protected Film checkFilm(Integer idFilm) {
-        Map<Integer, Film> films = filmStorage.getFilms();
-        if (!films.containsKey(idFilm)) {
-            throw new FilmNotFoundException("Фильма с таким id не существует");
-        }
-        return films.get(idFilm);
-    }
+    User checkUser(Integer idUser);
 
-    protected User checkUser(Integer idUser) {
-        Map<Integer, User> users = userStorage.getUsers();
-        if (!users.containsKey(idUser)) {
-            throw new UserNotFoundException("Пользователя с таким id не существует");
-        }
-        return users.get(idUser);
+    Collection<Film> getAllFilms();
 
-    }
+    Film getFilm(int id);
 
-    public Collection<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
-    }
+    Film createNewFilm(Film film);
 
-    public Film getFilm(int id) {
-        return filmStorage.getFilm(id);
-    }
+    Film updateFilm(Film film);
 
-    public Film createNewFilm(Film film) {
-        return filmStorage.createNewFilm(film);
-    }
+    MpaRating getMpaRating(int id);
 
-    public Film updateFilm(Film film) {
-        return filmStorage.updateFilm(film);
-    }
+    Collection<MpaRating> getMpaRatings();
+
+    Genre getGenre(int id);
+
+    Collection<Genre> getGenres();
 }
